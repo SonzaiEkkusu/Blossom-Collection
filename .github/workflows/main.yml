@@ -16,6 +16,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create Tag
+        run: |
+          git tag ${{ github.event.inputs.tag_name }}
+          git push origin ${{ github.event.inputs.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download file
         run: |
           curl -L -o Arrow-v11.0-blossom-20240616-VANILLA-signed.zip https://onedrive-vercel-index-kohl-eight-30.vercel.app/api/raw/?path=/Arrow-v11.0-blossom-20240616-VANILLA-signed.zip
@@ -26,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: Manual Release ${{ github.sha }}
+          tag_name: ${{ github.event.inputs.tag_name }}
+          release_name: Manual Release ${{ github.event.inputs.tag_name }}
           draft: false
           prerelease: false
 
