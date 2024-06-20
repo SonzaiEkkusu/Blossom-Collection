@@ -6,7 +6,11 @@ on:
       tag_name:
         description: 'Tag name for the release'
         required: true
-        default: 'v1.0.0'
+        default: 'arrow'
+      release_name:
+        description: 'Release name for the release'
+        required: true
+        default: 'Arrow A11 64Bit'
 
 jobs:
   release:
@@ -33,22 +37,25 @@ jobs:
           curl -L -o Arrow-v11.0-blossom-20240616-VANILLA-signed.zip https://onedrive-vercel-index-kohl-eight-30.vercel.app/api/raw/?path=/Arrow-v11.0-blossom-20240616-VANILLA-signed.zip
 
       - name: Create GitHub Release
-        id: create_release
         uses: actions/create-release@v1
+        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.inputs.tag_name }}
-          release_name: Manual Release ${{ github.event.inputs.tag_name }}
+          release_name: ${{ github.event.inputs.release_name }}
           draft: false
           prerelease: false
+
+      - name: Set release upload URL
+        run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./Arrow-v11.0-blossom-20240616-VANILLA-signed.zip
           asset_name: Arrow-v11.0-blossom-20240616-VANILLA-signed.zip
           asset_content_type: application/zip
